@@ -1,5 +1,4 @@
-  import React from 'react';
-import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, Tooltip, Cell } from 'recharts';
 
 function SidebarStats({ 
   nodes, cellTypes, 
@@ -32,27 +31,11 @@ function SidebarStats({
           style={{ width: '100%', padding: '6px', boxSizing: 'border-box' }}
         />
       </div>
-      {/*
-      <div style={{ marginBottom: '30px' }}>
-        <p style={{ fontWeight: 'bold' }}>Node Cardinalities</p>
-        <div style={{ height: '150px', width: '100%' }}>
-          <ResponsiveContainer>
-            <BarChart data={stats}>
-              <XAxis dataKey="name" fontSize={12} />
-              <Tooltip />
-              <Bar dataKey="count" radius={[4, 4, 0, 0]}>
-                {stats.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.color} />)}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
-        */}
 
       <div style={{ marginBottom: '30px' }}>
         <p style={{ fontWeight: 'bold' }}>Node Cardinalities</p>
         <div style={{ height: '150px', width: '100%' }}>
-          {/* FIX 3: Explicit dimensions remove the Recharts calculation warning completely */}
+          {/*Explicit dimensions remove the Recharts calculation warning completely */}
           <BarChart width={340} height={150} data={stats} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
             <XAxis dataKey="name" fontSize={12} />
             <Tooltip />
