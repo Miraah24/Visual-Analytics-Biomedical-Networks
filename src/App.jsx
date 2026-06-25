@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import NetworkOverview from './NetworkOverview';
 import SidebarStats from './SidebarStats';
 import rawNetworkData from './network_data.json';
@@ -24,6 +24,9 @@ function App() {
 
   // Filter network
   const filteredElements = useMemo(() => {
+    // Define searchLower before using it in the loop
+    const searchLower = localSearch.toLowerCase();
+
     const edges = initialElements.edges.filter(edge => {
       const d = edge.data;
       
@@ -33,15 +36,16 @@ function App() {
       // Check sender and receiver cell types
       const senderPasses = activeSenders[d.source_celltype] !== false;
       const receiverPasses = activeReceivers[d.target_celltype] !== false;
-      // M2 filtreing
-  const matchesSearch = localSearch === '' ||
-                        d.source.toLowerCase().includes(searchLower) || 
+      
+      // M2 filtering
+      const matchesSearch = localSearch === '' ||
+                            d.source.toLowerCase().includes(searchLower) || 
                             d.target.toLowerCase().includes(searchLower);
 
       return weightPasses && senderPasses && receiverPasses && matchesSearch;
     });
     
-    // 2. Only keep valid nodes
+    // Only keep valid nodes
     const validNodeIds = new Set();
     edges.forEach(e => {
       validNodeIds.add(e.data.source);
@@ -51,7 +55,7 @@ function App() {
     const nodes = initialElements.nodes.filter(n => validNodeIds.has(n.data.id));
 
     return { nodes, edges };
-  }, [initialElements, activeSenders, activeReceivers, weightThreshold]);
+  }, [initialElements, activeSenders, activeReceivers, weightThreshold, localSearch]); // FIX 3: Added localSearch here
 
   return (
     <div style={{ display: 'flex', height: '100vh', width: '100vw', fontFamily: 'sans-serif' }}>
