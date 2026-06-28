@@ -15,27 +15,29 @@ function NetworkOverview({
   const cyRef = useRef(null);
   const [tooltip, setTooltip] = useState(null);
 
+  // Calculate the maximum based on the square root of betweenness_centrality
   const maxBcValue = useMemo(() => {
     if (!elements || !elements.nodes) return 0.001; 
-    const max = Math.max(...elements.nodes.map(n => n.data.betweenness_centrality || 0));
+    const max = Math.max(...elements.nodes.map(n => Math.sqrt(n.data.betweenness_centrality || 0)));
     return max > 0 ? max : 0.001;
   }, [elements]);
 
+  // map sizes using visual_score from 12 to 50
   const cyStylesheet = useMemo(() => [
     { 
       selector: 'node', 
       style: { 
         'border-width': 1, 
         'border-color': '#fff',
-        'width': `mapData(betweenness_centrality, 0, ${maxBcValue}, 14, 45)`,
-        'height': `mapData(betweenness_centrality, 0, ${maxBcValue}, 14, 45)`
+        'width': `mapData(visual_score, 0, ${maxBcValue}, 12, 50)`,
+        'height': `mapData(visual_score, 0, ${maxBcValue}, 12, 50)`
       } 
     },
     { selector: 'node[moltype = "TF"]', style: { 'background-color': '#ff7f0e' } },
     { selector: 'node[moltype = "ligand"]', style: { 'background-color': '#2ca02c' } },
     { selector: 'node[moltype = "receptor"]', style: { 'background-color': '#1f77b4' } },
     { selector: 'node.search-match', style: { 'border-width': 5, 'border-color': '#eab308', 'background-color': '#eab308', 'label': 'data(name)', 'z-index': 9999 } },
-    { selector: 'node.lens-magnified', style: { 'width': 75, 'height': 75, 'label': 'data(name)', 'z-index': 9999, 'border-width': 4, 'border-color': '#10b981', 'text-valign': 'center' } },
+    { selector: 'node.lens-magnified', style: { 'width': 60, 'height': 60, 'label': 'data(name)', 'font-size': 14, 'z-index': 9999, 'border-width': 4, 'border-color': '#10b981', 'text-valign': 'center' } },
     { selector: 'edge', style: { 'width': 1, 'opacity': 0.15, 'curve-style': 'straight', 'line-color': '#bbb', 'target-arrow-shape': 'triangle' } },
     { selector: 'edge[weight < 0]', style: { 'line-color': '#d62728', 'target-arrow-shape': 'tee' } },
     { selector: 'edge[weight > 0]', style: { 'line-color': '#2ca02c' } }
@@ -98,7 +100,14 @@ function NetworkOverview({
           receptorCount++;
         }
 
-        return { ...node, position: { x, y } };
+        const rawScore = node.data.betweenness_centrality || 0;
+        const visualScore = Math.sqrt(rawScore);
+
+        return { 
+          ...node, 
+          data: { ...node.data, visual_score: visualScore },
+          position: { x, y } 
+        };
       });
 
     return [...positionedNodes, ...filteredEdges];
@@ -128,13 +137,32 @@ function NetworkOverview({
       const cy = cyRef.current;
       cy.fit(cy.elements(), 40);
 
+      cy.on('mousemove', (event) => {
+        if (!lensMode) return;
+        
+        const radius = 100;
+        const mousePos = event.position;
+
+        cy.nodes().removeClass('lens-magnified');
+
+        const nodesInRadius = cy.nodes().filter(node => {
+          const nodePos = node.position();
+          const dx = nodePos.x - mousePos.x;
+          const dy = nodePos.y - mousePos.y;
+          return Math.sqrt(dx * dx + dy * dy) <= radius;
+        });
+
+        nodesInRadius.addClass('lens-magnified');
+      });
+
+      // --- HOVER LOGIC ---
       cy.on('mouseover', 'node', (event) => {
         const node = event.target;
         if (!node) return;
+        
         const score = node.data('betweenness_centrality') || 0;
 
         if (lensMode) {
-          node.addClass('lens-magnified');
           setLensMetadata({
             id: node.data('id'),
             name: node.data('name'),
@@ -145,16 +173,23 @@ function NetworkOverview({
         } else {
           node.addClass('hovered');
           setTooltip({
-            x: event.originalEvent.offsetX, y: event.originalEvent.offsetY,
+            x: node.renderedPosition('x'), 
+            y: node.renderedPosition('y'),
             content: `<strong>Molecule:</strong> ${node.data('name')}<br/><strong>BC Centrality:</strong> ${score.toFixed(4)}`
           });
         }
       });
 
       cy.on('mouseout', 'node', (event) => {
-        if (event.target) event.target.removeClass('hovered lens-magnified');
+        if (event.target) event.target.removeClass('hovered');
         setTooltip(null);
         setLensMetadata(null);
+      });
+
+      cy.on('mouseout', (event) => {
+        if (event.target === cy && lensMode) {
+          cy.nodes().removeClass('lens-magnified');
+        }
       });
 
       const handleSelectionChange = () => {
@@ -198,7 +233,7 @@ function NetworkOverview({
         boxSelectionEnabled={true} 
         cy={(cy) => { cyRef.current = cy; }} 
       />
-      {tooltip && (
+      {tooltip && !lensMode && (
         <div style={{ position: 'absolute', top: tooltip.y + 12, left: tooltip.x + 12, backgroundColor: 'rgba(15, 23, 42, 0.95)', color: '#fff', padding: '8px 12px', borderRadius: '6px', fontSize: '11px', pointerEvents: 'none', zIndex: 1000 }} dangerouslySetInnerHTML={{ __html: tooltip.content }} />
       )}
     </div>
