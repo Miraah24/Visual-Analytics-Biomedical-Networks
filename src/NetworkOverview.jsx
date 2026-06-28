@@ -15,14 +15,13 @@ function NetworkOverview({
   const cyRef = useRef(null);
   const [tooltip, setTooltip] = useState(null);
 
-  // Calculate the maximum based on the square root of betweenness_centrality
   const maxBcValue = useMemo(() => {
     if (!elements || !elements.nodes) return 0.001; 
     const max = Math.max(...elements.nodes.map(n => Math.sqrt(n.data.betweenness_centrality || 0)));
     return max > 0 ? max : 0.001;
   }, [elements]);
 
-  // map sizes using visual_score from 12 to 50
+  // ADDED: Visual rules for :selected and .hovered states
   const cyStylesheet = useMemo(() => [
     { 
       selector: 'node', 
@@ -36,6 +35,8 @@ function NetworkOverview({
     { selector: 'node[moltype = "TF"]', style: { 'background-color': '#ff7f0e' } },
     { selector: 'node[moltype = "ligand"]', style: { 'background-color': '#2ca02c' } },
     { selector: 'node[moltype = "receptor"]', style: { 'background-color': '#1f77b4' } },
+    { selector: 'node:selected', style: { 'border-width': 4, 'border-color': '#eab308', 'background-color': '#eab308' } },
+    { selector: 'node.hovered', style: { 'border-width': 3, 'border-color': '#10b981' } },
     { selector: 'node.search-match', style: { 'border-width': 5, 'border-color': '#eab308', 'background-color': '#eab308', 'label': 'data(name)', 'z-index': 9999 } },
     { selector: 'node.lens-magnified', style: { 'width': 60, 'height': 60, 'label': 'data(name)', 'font-size': 14, 'z-index': 9999, 'border-width': 4, 'border-color': '#10b981', 'text-valign': 'center' } },
     { selector: 'edge', style: { 'width': 1, 'opacity': 0.15, 'curve-style': 'straight', 'line-color': '#bbb', 'target-arrow-shape': 'triangle' } },
@@ -114,7 +115,7 @@ function NetworkOverview({
   }, [elements, activeSenders, activeReceivers, weightThreshold]);
 
   useEffect(() => {
-    if (cyRef.current && activeTab === 'graph') {
+    if (cyRef.current && (!activeTab || activeTab === 'graph')) {
       const cy = cyRef.current;
       cy.nodes().removeClass('search-match');
     
@@ -133,10 +134,11 @@ function NetworkOverview({
   }, [localSearch, activeTab]);
 
   useEffect(() => {
-    if (cyRef.current && activeTab === 'graph') {
+    if (cyRef.current && (!activeTab || activeTab === 'graph')) {
       const cy = cyRef.current;
       cy.fit(cy.elements(), 40);
 
+      // --- ANALYTICAL LENS ---
       cy.on('mousemove', (event) => {
         if (!lensMode) return;
         
@@ -173,13 +175,14 @@ function NetworkOverview({
         } else {
           node.addClass('hovered');
           setTooltip({
-            x: node.renderedPosition('x'), 
-            y: node.renderedPosition('y'),
+            x: event.renderedPosition.x, 
+            y: event.renderedPosition.y,
             content: `<strong>Molecule:</strong> ${node.data('name')}<br/><strong>BC Centrality:</strong> ${score.toFixed(4)}`
           });
         }
       });
 
+      // --- MOUSEOUT LOGIC ---
       cy.on('mouseout', 'node', (event) => {
         if (event.target) event.target.removeClass('hovered');
         setTooltip(null);
@@ -192,6 +195,7 @@ function NetworkOverview({
         }
       });
 
+      // --- SELECTION / BRUSHING LOGIC ---
       const handleSelectionChange = () => {
         const selections = cy.nodes(':selected').map(node => {
           const nId = node.data('id');
@@ -219,7 +223,13 @@ function NetworkOverview({
       
       cy.on('select unselect boxselect', 'node', handleSelectionChange);
       
-      return () => cy.removeAllListeners();
+      return () => {
+        cy.off('mouseover', 'node');
+        cy.off('mouseout', 'node');
+        cy.off('select unselect boxselect', 'node');
+        cy.off('mousemove');
+        cy.off('mouseout');
+      };
     }
   }, [processedElements, activeTab, lensMode, setLensMetadata, setBrushedNodes]);
 
