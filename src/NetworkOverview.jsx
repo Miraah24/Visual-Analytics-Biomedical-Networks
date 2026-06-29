@@ -243,6 +243,8 @@ function NetworkOverview({
           }
         });
 
+        setFocusLegend({ outbound: outboundCount, inbound: inboundCount });
+
         setSelectedElement(buildNodeSelection(node));
       };
 
