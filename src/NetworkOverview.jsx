@@ -15,7 +15,6 @@ function NetworkOverview({
  }) {
   const cyRef = useRef(null);
   const [tooltip, setTooltip] = useState(null);
-<<<<<<< HEAD
   const [focusLegend, setFocusLegend] = useState(null);
 
   const formatNodeTooltip = (node) => {
@@ -42,9 +41,6 @@ function NetworkOverview({
     ].join('<br/>');
   };
 
-=======
-
->>>>>>> 885ddcb7e9b4eeea4b0a6b2b9528bdfbc5c22d43
   const maxBcValue = useMemo(() => {
     if (!elements || !elements.nodes) return 0.001; 
     const max = Math.max(...elements.nodes.map(n => Math.sqrt(n.data.betweenness_centrality || 0)));
@@ -66,7 +62,6 @@ function NetworkOverview({
     { selector: 'node[moltype = "ligand"]', style: { 'background-color': '#2ca02c' } },
     { selector: 'node[moltype = "receptor"]', style: { 'background-color': '#1f77b4' } },
     { selector: 'node:selected', style: { 'border-width': 4, 'border-color': '#eab308', 'background-color': '#eab308' } },
-<<<<<<< HEAD
     { selector: 'node.hovered', style: { 'border-width': 3, 'border-color': '#10b981', 'z-index': 500 } },
     { selector: 'node.faded', style: { 'opacity': 0.12 } },
     { selector: 'node.focus-active', style: { 'border-width': 5, 'border-color': '#eab308', 'opacity': 1, 'z-index': 9999 } },
@@ -82,14 +77,6 @@ function NetworkOverview({
     { selector: 'edge.focus-connected', style: { 'opacity': 0.9, 'width': 2.5, 'z-index': 8000 } },
     { selector: 'edge.edge-outbound', style: { 'opacity': 1, 'width': 3.5, 'line-color': '#22c55e', 'z-index': 8500 } },
     { selector: 'edge.edge-inbound', style: { 'opacity': 1, 'width': 3.5, 'line-color': '#f97316', 'z-index': 8500 } }
-=======
-    { selector: 'node.hovered', style: { 'border-width': 3, 'border-color': '#10b981' } },
-    { selector: 'node.search-match', style: { 'border-width': 5, 'border-color': '#eab308', 'background-color': '#eab308', 'label': 'data(name)', 'z-index': 9999 } },
-    { selector: 'node.lens-magnified', style: { 'width': 60, 'height': 60, 'label': 'data(name)', 'font-size': 14, 'z-index': 9999, 'border-width': 4, 'border-color': '#10b981', 'text-valign': 'center' } },
-    { selector: 'edge', style: { 'width': 1, 'opacity': 0.15, 'curve-style': 'straight', 'line-color': '#bbb', 'target-arrow-shape': 'triangle' } },
-    { selector: 'edge[weight < 0]', style: { 'line-color': '#d62728', 'target-arrow-shape': 'tee' } },
-    { selector: 'edge[weight > 0]', style: { 'line-color': '#2ca02c' } }
->>>>>>> 885ddcb7e9b4eeea4b0a6b2b9528bdfbc5c22d43
   ], [maxBcValue]);
 
   // eslint-disable-next-line react-hooks/preserve-manual-memoization
@@ -186,7 +173,6 @@ function NetworkOverview({
       const cy = cyRef.current;
       cy.fit(cy.elements(), 40);
 
-<<<<<<< HEAD
       const clearFocus = () => {
         cy.elements().removeClass('faded focus-active focus-connected hovered edge-outbound edge-inbound');
         setFocusLegend(null);
@@ -279,8 +265,6 @@ function NetworkOverview({
         });
       };
 
-=======
->>>>>>> 885ddcb7e9b4eeea4b0a6b2b9528bdfbc5c22d43
       // --- ANALYTICAL LENS ---
       cy.on('mousemove', (event) => {
         if (!lensMode) return;
@@ -300,7 +284,6 @@ function NetworkOverview({
         nodesInRadius.addClass('lens-magnified');
       });
 
-<<<<<<< HEAD
       // --- NODE HOVER ---
       cy.on('mouseover', 'node', (event) => {
         const node = event.target;
@@ -308,16 +291,6 @@ function NetworkOverview({
 
         if (lensMode) {
           const score = node.data('betweenness_centrality') || 0;
-=======
-      // --- HOVER LOGIC ---
-      cy.on('mouseover', 'node', (event) => {
-        const node = event.target;
-        if (!node) return;
-        
-        const score = node.data('betweenness_centrality') || 0;
-
-        if (lensMode) {
->>>>>>> 885ddcb7e9b4eeea4b0a6b2b9528bdfbc5c22d43
           setLensMetadata({
             id: node.data('id'),
             name: node.data('name'),
@@ -327,7 +300,6 @@ function NetworkOverview({
           });
         } else {
           node.addClass('hovered');
-<<<<<<< HEAD
           showTooltip(event, formatNodeTooltip(node));
         }
       });
@@ -337,24 +309,12 @@ function NetworkOverview({
         showTooltip(event, formatNodeTooltip(event.target));
       });
 
-=======
-          setTooltip({
-            x: event.renderedPosition.x, 
-            y: event.renderedPosition.y,
-            content: `<strong>Molecule:</strong> ${node.data('name')}<br/><strong>BC Centrality:</strong> ${score.toFixed(4)}`
-          });
-        }
-      });
-
-      // --- MOUSEOUT LOGIC ---
->>>>>>> 885ddcb7e9b4eeea4b0a6b2b9528bdfbc5c22d43
       cy.on('mouseout', 'node', (event) => {
         if (event.target) event.target.removeClass('hovered');
         setTooltip(null);
         setLensMetadata(null);
       });
 
-<<<<<<< HEAD
       // --- EDGE HOVER ---
       cy.on('mouseover', 'edge', (event) => {
         const edge = event.target;
@@ -372,15 +332,12 @@ function NetworkOverview({
         setTooltip(null);
       });
 
-=======
->>>>>>> 885ddcb7e9b4eeea4b0a6b2b9528bdfbc5c22d43
       cy.on('mouseout', (event) => {
         if (event.target === cy && lensMode) {
           cy.nodes().removeClass('lens-magnified');
         }
       });
 
-<<<<<<< HEAD
       // --- CLICK FOCUS ---
       cy.on('tap', 'node', (event) => {
         applyNodeFocus(event.target);
@@ -396,8 +353,6 @@ function NetworkOverview({
         }
       });
 
-=======
->>>>>>> 885ddcb7e9b4eeea4b0a6b2b9528bdfbc5c22d43
       // --- SELECTION / BRUSHING LOGIC ---
       const handleSelectionChange = () => {
         const selections = cy.nodes(':selected').map(node => {
@@ -428,7 +383,6 @@ function NetworkOverview({
       
       return () => {
         cy.off('mouseover', 'node');
-<<<<<<< HEAD
         cy.off('mousemove', 'node');
         cy.off('mouseout', 'node');
         cy.off('mouseover', 'edge');
@@ -437,19 +391,12 @@ function NetworkOverview({
         cy.off('tap', 'node');
         cy.off('tap', 'edge');
         cy.off('tap');
-=======
-        cy.off('mouseout', 'node');
->>>>>>> 885ddcb7e9b4eeea4b0a6b2b9528bdfbc5c22d43
         cy.off('select unselect boxselect', 'node');
         cy.off('mousemove');
         cy.off('mouseout');
       };
     }
-<<<<<<< HEAD
   }, [processedElements, activeTab, lensMode, setLensMetadata, setBrushedNodes, setSelectedElement]);
-=======
-  }, [processedElements, activeTab, lensMode, setLensMetadata, setBrushedNodes]);
->>>>>>> 885ddcb7e9b4eeea4b0a6b2b9528bdfbc5c22d43
 
   return (
     <div style={{ width: '100%', height: '100%', position: 'relative' }}>
@@ -462,7 +409,6 @@ function NetworkOverview({
         cy={(cy) => { cyRef.current = cy; }} 
       />
       {tooltip && !lensMode && (
-<<<<<<< HEAD
         <div style={{ position: 'absolute', top: tooltip.y + 12, left: tooltip.x + 12, backgroundColor: 'rgba(15, 23, 42, 0.95)', color: '#fff', padding: '10px 14px', borderRadius: '6px', fontSize: '11px', lineHeight: 1.5, pointerEvents: 'none', zIndex: 1000, maxWidth: '280px', boxShadow: '0 4px 12px rgba(0,0,0,0.25)' }} dangerouslySetInnerHTML={{ __html: tooltip.content }} />
       )}
       {focusLegend && (
@@ -477,9 +423,6 @@ function NetworkOverview({
             <span>Toward node ({focusLegend.inbound})</span>
           </div>
         </div>
-=======
-        <div style={{ position: 'absolute', top: tooltip.y + 12, left: tooltip.x + 12, backgroundColor: 'rgba(15, 23, 42, 0.95)', color: '#fff', padding: '8px 12px', borderRadius: '6px', fontSize: '11px', pointerEvents: 'none', zIndex: 1000 }} dangerouslySetInnerHTML={{ __html: tooltip.content }} />
->>>>>>> 885ddcb7e9b4eeea4b0a6b2b9528bdfbc5c22d43
       )}
     </div>
   );
