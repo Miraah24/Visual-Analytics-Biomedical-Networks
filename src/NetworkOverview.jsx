@@ -15,7 +15,36 @@ function NetworkOverview({
  }) {
   const cyRef = useRef(null);
   const [tooltip, setTooltip] = useState(null);
+<<<<<<< HEAD
+  const [focusLegend, setFocusLegend] = useState(null);
 
+  const formatNodeTooltip = (node) => {
+    const score = node.data('betweenness_centrality') || 0;
+    return [
+      `<strong>Name:</strong> ${node.data('name') || node.data('id')}`,
+      `<strong>ID:</strong> ${node.data('id')}`,
+      `<strong>Molecule Type:</strong> ${node.data('moltype') || 'N/A'}`,
+      `<strong>Cell Type:</strong> ${node.data('celltype') || 'N/A'}`,
+      `<strong>BC Centrality:</strong> ${score.toFixed(4)}`
+    ].join('<br/>');
+  };
+
+  const formatEdgeTooltip = (edge, cy) => {
+    const srcNode = cy.getElementById(edge.data('source'));
+    const tgtNode = cy.getElementById(edge.data('target'));
+    const weight = edge.data('weight');
+    return [
+      `<strong>Source:</strong> ${edge.data('source')}${srcNode.nonempty() ? ` (${srcNode.data('name')})` : ''}`,
+      `<strong>Target:</strong> ${edge.data('target')}${tgtNode.nonempty() ? ` (${tgtNode.data('name')})` : ''}`,
+      `<strong>Weight:</strong> ${weight ?? 'N/A'}`,
+      `<strong>Interaction Type:</strong> ${edge.data('type') || 'N/A'}`,
+      `<strong>Layer:</strong> ${edge.data('layer') ?? 'N/A'}`
+    ].join('<br/>');
+  };
+
+=======
+
+>>>>>>> 885ddcb7e9b4eeea4b0a6b2b9528bdfbc5c22d43
   const maxBcValue = useMemo(() => {
     if (!elements || !elements.nodes) return 0.001; 
     const max = Math.max(...elements.nodes.map(n => Math.sqrt(n.data.betweenness_centrality || 0)));
@@ -37,12 +66,30 @@ function NetworkOverview({
     { selector: 'node[moltype = "ligand"]', style: { 'background-color': '#2ca02c' } },
     { selector: 'node[moltype = "receptor"]', style: { 'background-color': '#1f77b4' } },
     { selector: 'node:selected', style: { 'border-width': 4, 'border-color': '#eab308', 'background-color': '#eab308' } },
+<<<<<<< HEAD
+    { selector: 'node.hovered', style: { 'border-width': 3, 'border-color': '#10b981', 'z-index': 500 } },
+    { selector: 'node.faded', style: { 'opacity': 0.12 } },
+    { selector: 'node.focus-active', style: { 'border-width': 5, 'border-color': '#eab308', 'opacity': 1, 'z-index': 9999 } },
+    { selector: 'node.focus-connected', style: { 'border-width': 3, 'border-color': '#60a5fa', 'opacity': 1, 'z-index': 8000 } },
+    { selector: 'node.search-match', style: { 'border-width': 5, 'border-color': '#eab308', 'background-color': '#eab308', 'label': 'data(name)', 'z-index': 9999 } },
+    { selector: 'node.lens-magnified', style: { 'width': 60, 'height': 60, 'label': 'data(name)', 'font-size': 14, 'z-index': 9999, 'border-width': 4, 'border-color': '#10b981', 'text-valign': 'center' } },
+    { selector: 'edge', style: { 'width': 1, 'opacity': 0.15, 'curve-style': 'straight', 'line-color': '#bbb', 'target-arrow-shape': 'triangle', 'overlay-opacity': 0, 'overlay-padding': 6 } },
+    { selector: 'edge[weight < 0]', style: { 'line-color': '#d62728', 'target-arrow-shape': 'tee' } },
+    { selector: 'edge[weight > 0]', style: { 'line-color': '#2ca02c' } },
+    { selector: 'edge.hovered', style: { 'opacity': 0.95, 'width': 3, 'z-index': 500 } },
+    { selector: 'edge.faded', style: { 'opacity': 0.04 } },
+    { selector: 'edge.focus-active', style: { 'opacity': 1, 'width': 4, 'line-color': '#eab308', 'z-index': 9999 } },
+    { selector: 'edge.focus-connected', style: { 'opacity': 0.9, 'width': 2.5, 'z-index': 8000 } },
+    { selector: 'edge.edge-outbound', style: { 'opacity': 1, 'width': 3.5, 'line-color': '#22c55e', 'z-index': 8500 } },
+    { selector: 'edge.edge-inbound', style: { 'opacity': 1, 'width': 3.5, 'line-color': '#f97316', 'z-index': 8500 } }
+=======
     { selector: 'node.hovered', style: { 'border-width': 3, 'border-color': '#10b981' } },
     { selector: 'node.search-match', style: { 'border-width': 5, 'border-color': '#eab308', 'background-color': '#eab308', 'label': 'data(name)', 'z-index': 9999 } },
     { selector: 'node.lens-magnified', style: { 'width': 60, 'height': 60, 'label': 'data(name)', 'font-size': 14, 'z-index': 9999, 'border-width': 4, 'border-color': '#10b981', 'text-valign': 'center' } },
     { selector: 'edge', style: { 'width': 1, 'opacity': 0.15, 'curve-style': 'straight', 'line-color': '#bbb', 'target-arrow-shape': 'triangle' } },
     { selector: 'edge[weight < 0]', style: { 'line-color': '#d62728', 'target-arrow-shape': 'tee' } },
     { selector: 'edge[weight > 0]', style: { 'line-color': '#2ca02c' } }
+>>>>>>> 885ddcb7e9b4eeea4b0a6b2b9528bdfbc5c22d43
   ], [maxBcValue]);
 
   // eslint-disable-next-line react-hooks/preserve-manual-memoization
@@ -139,6 +186,101 @@ function NetworkOverview({
       const cy = cyRef.current;
       cy.fit(cy.elements(), 40);
 
+<<<<<<< HEAD
+      const clearFocus = () => {
+        cy.elements().removeClass('faded focus-active focus-connected hovered edge-outbound edge-inbound');
+        setFocusLegend(null);
+        setSelectedElement(null);
+      };
+
+      const buildNodeSelection = (node) => {
+        const nodeId = node.data('id');
+        const nodeData = node.data();
+        const outbound = [];
+        const inbound = [];
+
+        node.connectedEdges().forEach(edge => {
+          const isOutbound = edge.data('source') === nodeId;
+          const neighbor = isOutbound ? edge.target() : edge.source();
+          const entry = {
+            id: neighbor.data('id'),
+            name: neighbor.data('name'),
+            moltype: neighbor.data('moltype'),
+            celltype: neighbor.data('celltype'),
+            weight: edge.data('weight'),
+            type: edge.data('type')
+          };
+
+          if (isOutbound) outbound.push(entry);
+          else inbound.push(entry);
+        });
+
+        return {
+          kind: 'node',
+          data: { ...nodeData },
+          connections: { outbound, inbound }
+        };
+      };
+
+      const buildEdgeSelection = (edge) => {
+        const source = edge.source();
+        const target = edge.target();
+
+        return {
+          kind: 'edge',
+          data: { ...edge.data() },
+          sourceNode: source.nonempty() ? { ...source.data() } : null,
+          targetNode: target.nonempty() ? { ...target.data() } : null
+        };
+      };
+
+      const applyNodeFocus = (node) => {
+        clearFocus();
+        const nodeId = node.data('id');
+        const connectedEdges = node.connectedEdges();
+        const neighbors = connectedEdges.connectedNodes();
+
+        cy.elements().addClass('faded');
+        node.removeClass('faded').addClass('focus-active');
+        neighbors.removeClass('faded').addClass('focus-connected');
+
+        let outboundCount = 0;
+        let inboundCount = 0;
+
+        connectedEdges.removeClass('faded').forEach(edge => {
+          if (edge.data('source') === nodeId) {
+            edge.addClass('edge-outbound');
+            outboundCount++;
+          } else {
+            edge.addClass('edge-inbound');
+            inboundCount++;
+          }
+        });
+
+        setSelectedElement(buildNodeSelection(node));
+      };
+
+      const applyEdgeFocus = (edge) => {
+        clearFocus();
+        const highlighted = edge.union(edge.source()).union(edge.target());
+        cy.elements().addClass('faded');
+        highlighted.removeClass('faded');
+        edge.addClass('focus-active');
+        edge.source().addClass('focus-connected');
+        edge.target().addClass('focus-connected');
+        setSelectedElement(buildEdgeSelection(edge));
+      };
+
+      const showTooltip = (event, content) => {
+        setTooltip({
+          x: event.renderedPosition.x,
+          y: event.renderedPosition.y,
+          content
+        });
+      };
+
+=======
+>>>>>>> 885ddcb7e9b4eeea4b0a6b2b9528bdfbc5c22d43
       // --- ANALYTICAL LENS ---
       cy.on('mousemove', (event) => {
         if (!lensMode) return;
@@ -158,6 +300,15 @@ function NetworkOverview({
         nodesInRadius.addClass('lens-magnified');
       });
 
+<<<<<<< HEAD
+      // --- NODE HOVER ---
+      cy.on('mouseover', 'node', (event) => {
+        const node = event.target;
+        if (!node) return;
+
+        if (lensMode) {
+          const score = node.data('betweenness_centrality') || 0;
+=======
       // --- HOVER LOGIC ---
       cy.on('mouseover', 'node', (event) => {
         const node = event.target;
@@ -166,6 +317,7 @@ function NetworkOverview({
         const score = node.data('betweenness_centrality') || 0;
 
         if (lensMode) {
+>>>>>>> 885ddcb7e9b4eeea4b0a6b2b9528bdfbc5c22d43
           setLensMetadata({
             id: node.data('id'),
             name: node.data('name'),
@@ -175,6 +327,17 @@ function NetworkOverview({
           });
         } else {
           node.addClass('hovered');
+<<<<<<< HEAD
+          showTooltip(event, formatNodeTooltip(node));
+        }
+      });
+
+      cy.on('mousemove', 'node', (event) => {
+        if (lensMode) return;
+        showTooltip(event, formatNodeTooltip(event.target));
+      });
+
+=======
           setTooltip({
             x: event.renderedPosition.x, 
             y: event.renderedPosition.y,
@@ -184,18 +347,57 @@ function NetworkOverview({
       });
 
       // --- MOUSEOUT LOGIC ---
+>>>>>>> 885ddcb7e9b4eeea4b0a6b2b9528bdfbc5c22d43
       cy.on('mouseout', 'node', (event) => {
         if (event.target) event.target.removeClass('hovered');
         setTooltip(null);
         setLensMetadata(null);
       });
 
+<<<<<<< HEAD
+      // --- EDGE HOVER ---
+      cy.on('mouseover', 'edge', (event) => {
+        const edge = event.target;
+        if (!edge) return;
+        edge.addClass('hovered');
+        showTooltip(event, formatEdgeTooltip(edge, cy));
+      });
+
+      cy.on('mousemove', 'edge', (event) => {
+        showTooltip(event, formatEdgeTooltip(event.target, cy));
+      });
+
+      cy.on('mouseout', 'edge', (event) => {
+        if (event.target) event.target.removeClass('hovered');
+        setTooltip(null);
+      });
+
+=======
+>>>>>>> 885ddcb7e9b4eeea4b0a6b2b9528bdfbc5c22d43
       cy.on('mouseout', (event) => {
         if (event.target === cy && lensMode) {
           cy.nodes().removeClass('lens-magnified');
         }
       });
 
+<<<<<<< HEAD
+      // --- CLICK FOCUS ---
+      cy.on('tap', 'node', (event) => {
+        applyNodeFocus(event.target);
+      });
+
+      cy.on('tap', 'edge', (event) => {
+        applyEdgeFocus(event.target);
+      });
+
+      cy.on('tap', (event) => {
+        if (event.target === cy) {
+          clearFocus();
+        }
+      });
+
+=======
+>>>>>>> 885ddcb7e9b4eeea4b0a6b2b9528bdfbc5c22d43
       // --- SELECTION / BRUSHING LOGIC ---
       const handleSelectionChange = () => {
         const selections = cy.nodes(':selected').map(node => {
@@ -226,13 +428,28 @@ function NetworkOverview({
       
       return () => {
         cy.off('mouseover', 'node');
+<<<<<<< HEAD
+        cy.off('mousemove', 'node');
         cy.off('mouseout', 'node');
+        cy.off('mouseover', 'edge');
+        cy.off('mousemove', 'edge');
+        cy.off('mouseout', 'edge');
+        cy.off('tap', 'node');
+        cy.off('tap', 'edge');
+        cy.off('tap');
+=======
+        cy.off('mouseout', 'node');
+>>>>>>> 885ddcb7e9b4eeea4b0a6b2b9528bdfbc5c22d43
         cy.off('select unselect boxselect', 'node');
         cy.off('mousemove');
         cy.off('mouseout');
       };
     }
+<<<<<<< HEAD
+  }, [processedElements, activeTab, lensMode, setLensMetadata, setBrushedNodes, setSelectedElement]);
+=======
   }, [processedElements, activeTab, lensMode, setLensMetadata, setBrushedNodes]);
+>>>>>>> 885ddcb7e9b4eeea4b0a6b2b9528bdfbc5c22d43
 
   return (
     <div style={{ width: '100%', height: '100%', position: 'relative' }}>
@@ -245,7 +462,24 @@ function NetworkOverview({
         cy={(cy) => { cyRef.current = cy; }} 
       />
       {tooltip && !lensMode && (
+<<<<<<< HEAD
+        <div style={{ position: 'absolute', top: tooltip.y + 12, left: tooltip.x + 12, backgroundColor: 'rgba(15, 23, 42, 0.95)', color: '#fff', padding: '10px 14px', borderRadius: '6px', fontSize: '11px', lineHeight: 1.5, pointerEvents: 'none', zIndex: 1000, maxWidth: '280px', boxShadow: '0 4px 12px rgba(0,0,0,0.25)' }} dangerouslySetInnerHTML={{ __html: tooltip.content }} />
+      )}
+      {focusLegend && (
+        <div style={{ position: 'absolute', bottom: 16, left: 16, backgroundColor: 'rgba(15, 23, 42, 0.92)', color: '#fff', padding: '10px 14px', borderRadius: '6px', fontSize: '11px', lineHeight: 1.6, pointerEvents: 'none', zIndex: 1000, boxShadow: '0 4px 12px rgba(0,0,0,0.25)' }}>
+          <div style={{ fontWeight: 'bold', marginBottom: '6px' }}>Edge Direction</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+            <span style={{ width: 24, height: 3, backgroundColor: '#22c55e', display: 'inline-block', borderRadius: 2 }} />
+            <span>Away from node ({focusLegend.outbound})</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ width: 24, height: 3, backgroundColor: '#f97316', display: 'inline-block', borderRadius: 2 }} />
+            <span>Toward node ({focusLegend.inbound})</span>
+          </div>
+        </div>
+=======
         <div style={{ position: 'absolute', top: tooltip.y + 12, left: tooltip.x + 12, backgroundColor: 'rgba(15, 23, 42, 0.95)', color: '#fff', padding: '8px 12px', borderRadius: '6px', fontSize: '11px', pointerEvents: 'none', zIndex: 1000 }} dangerouslySetInnerHTML={{ __html: tooltip.content }} />
+>>>>>>> 885ddcb7e9b4eeea4b0a6b2b9528bdfbc5c22d43
       )}
     </div>
   );
